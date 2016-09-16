@@ -1,0 +1,11 @@
+<XamlCompilerSaveState>
+  <ReferenceAssemblyList>
+    <LocalAssembly PathName="c:\users\dylan\documents\werk\chs\kinect2sample.lab3\kinect2sample\obj\x64\release\intermediatexaml\kinect2sample.exe" HashGuid="877a2bac-4561-208c-c04d-85d5f74a76c4" />
+    <ReferenceAssembly PathName="c:\program files (x86)\microsoft sdks\windows\v8.1\extensionsdks\microsoft.vclibs\12.0\references\commonconfiguration\neutral\platform.winmd" HashGuid="58b6b6d1-928e-9908-9804-eb460e5e101b" />
+    <ReferenceAssembly PathName="c:\program files (x86)\microsoft sdks\windows\v8.1\extensionsdks\windowspreview.kinect\2.0\references\commonconfiguration\neutral\windowspreview.data.winmd" HashGuid="bec3b354-5b74-1234-191f-25a435755c0a" />
+    <ReferenceAssembly PathName="c:\program files (x86)\microsoft sdks\windows\v8.1\extensionsdks\windowspreview.kinect\2.0\references\commonconfiguration\neutral\windowspreview.kinect.winmd" HashGuid="d7412096-a3c7-9108-a946-0ff0cc614d3f" />
+    <ReferenceAssembly PathName="c:\users\dylan\documents\hskt\kinect2sample.lab3\packages\engineioclientdotnet.0.9.22\lib\netcore45\engineioclientdotnet.dll" HashGuid="f5a697d5-4a74-ca1a-25d3-bd289b72631c" />
+    <ReferenceAssembly PathName="c:\users\dylan\documents\hskt\kinect2sample.lab3\packages\newtonsoft.json.8.0.1\lib\portable-net45+wp80+win8+wpa81+dnxcore50\newtonsoft.json.dll" HashGuid="45fca682-5804-bd5a-6c32-9ba745aa42e3" />
+    <ReferenceAssembly PathName="c:\users\dylan\documents\hskt\kinect2sample.lab3\packages\socketioclientdotnet.0.9.13\lib\netcore45\socketioclientdotnet.dll" HashGuid="a7411b01-cad4-1bc9-feab-a87cd35eb325" />
+  </ReferenceAssemblyList>
+</XamlCompilerSaveState>
