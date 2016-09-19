@@ -1,1 +1,0 @@
-C:\Users\dylan\Documents\HSKT\Kinect2Sample.Lab3\Kinect2Sample\Kinect2Sample.csproj;x64

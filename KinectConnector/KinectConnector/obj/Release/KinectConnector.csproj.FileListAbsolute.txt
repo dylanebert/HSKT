@@ -1,0 +1,13 @@
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\KinectConnector.exe.config
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\KinectConnector.exe
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\KinectConnector.pdb
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\EngineIoClientDotNet.dll
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\Microsoft.Kinect.dll
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\Newtonsoft.Json.dll
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\SocketIoClientDotNet.dll
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\WebSocket4Net.dll
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\Microsoft.Kinect.xml
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\Newtonsoft.Json.xml
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.csprojResolveAssemblyReference.cache
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.exe
+C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.pdb

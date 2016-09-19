@@ -31,9 +31,9 @@ $(document).ready(function() {
 	
 	//Initalisation
 	$('.container').fadeIn();
-	$('body').on('mousedown', function(e) {
+	/*$('body').on('mousedown', function(e) {
 		e.preventDefault();
-	});
+	});*/
 	
 	//Preload images
 	$.fn.preload = function() {
@@ -95,8 +95,8 @@ $(document).ready(function() {
 			$('#record-stop').removeClass('noevents').fadeTo(0, 1);
 			$('.list-group-item').addClass('noevents');
 			var filename = '';
-			var date = new Date();
-			filename += 'C:/data/' + date.getDay().toString() + '.' + date.getHours().toString() + '.' + date.getMinutes().toString() + '-step' + curStep.toString() + '-' + participantName + '.csv';
+			var now = new Date();
+			filename += 'C:/data/' + ('0' + now.getDate()).slice(-2) + '.' + ('0' + now.getHours()).slice(-2) + '.' + ('0' + now.getMinutes()).slice(-2) + '-step' + (parseInt(curStep) + 1).toString() + '-' + participantName + '.csv';
 			wstream = fs.createWriteStream(filename);
 		}		
 	});	
@@ -168,7 +168,7 @@ $(document).ready(function() {
 						$('#seq' + seqPos).css('color', 'red');
 						audios[curSet.charAt(curSeq[seqPos] - 1) - 1].play();
 						var now = new Date();
-						wstream.write((seqPos + 1) + ',' + now.getHours().toString() + '.' + now.getSeconds().toString() + '.' + now.getMilliseconds().toString());
+						wstream.write((seqPos + 1) + ',' + ('0' + now.getMinutes()).slice(-2) + '.' + ('0' + now.getSeconds()).slice(-2) + '.' + now.getMilliseconds() + '\r\n');
 						seqPos++;
 					}
 				}
