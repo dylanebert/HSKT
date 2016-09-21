@@ -21,13 +21,12 @@ $(document).ready(function() {
 	var seqDict = ['123434', '3423132412', '1324323123', '4313122423'];
 	var partDict = ['Head', 'Shoulders', 'Knees', 'Toes'];
 	
-	var recording, timer, startTime, seqPos, curStep, curSet, curSeq, i;
+	var recording, timer, startTime, seqPos, curStep, i;
 	var wstream = null;
 	var maxTime = 3000; //Time (ms) between each command
 	var kinectConnected = false;
 	var participantName = 'Name';
 	recording = timer = startTime = seqPos = curStep = i = 0;
-	curSet = curSeq = '';
 	
 	//Initalisation
 	$('.container').fadeIn();
@@ -64,17 +63,15 @@ $(document).ready(function() {
 			$(this).addClass('active');
 			curStep = $(this).attr('id').charAt(3);
 			var seqText = '';
-			curSet = setDict[curStep];
-			curSeq = seqDict[curStep];
-			for(i = 0; i < curSeq.length; i++) {
-				seqText += '<span id="seq' + i + '">' + curSeq[i] +'</span>';
+			for(i = 0; i < seqDict[curStep].length; i++) {
+				seqText += '<span id="seq' + i + '">' + seqDict[curStep][i] +'</span>';
 			}
 			$('#seq').html(seqText);
 			$('#a1, #a2, #a3, #a4').css('background-image', 'none');
-			$('#a1 h3').text(partDict[parseInt(curSet.toString().charAt(0)) - 1]).css('color', 'black');
-			$('#a2 h3').text(partDict[parseInt(curSet.toString().charAt(1)) - 1]).css('color', 'black');
-			$('#a3 h3').text(partDict[parseInt(curSet.toString().charAt(2)) - 1]).css('color', 'black');
-			$('#a4 h3').text(partDict[parseInt(curSet.toString().charAt(3)) - 1]).css('color', 'black');
+			$('#a1 h3').text(partDict[parseInt(setDict[curStep].toString().charAt(0)) - 1]).css('color', 'black');
+			$('#a2 h3').text(partDict[parseInt(setDict[curStep].toString().charAt(1)) - 1]).css('color', 'black');
+			$('#a3 h3').text(partDict[parseInt(setDict[curStep].toString().charAt(2)) - 1]).css('color', 'black');
+			$('#a4 h3').text(partDict[parseInt(setDict[curStep].toString().charAt(3)) - 1]).css('color', 'black');
 			$('#record-stop').addClass('noevents').fadeTo(0, 0.25);
 			if(kinectConnected)
 				$('#record-start').removeClass('noevents').fadeTo(0, 1);
@@ -150,23 +147,23 @@ $(document).ready(function() {
 					timer = 0;
 					var temp;
 					if(seqPos > 0) {
-						temp = '#a' + (curSeq[seqPos - 1]).toString();
+						temp = '#a' + (seqDict[curStep][seqPos - 1]).toString();
 						$(temp).css('background-image', 'none');
 						$('h3', temp).css('color', 'black');
 						$('#seq' + (seqPos - 1)).css('color', 'black');
 					}
-					if(seqPos > curSeq.length - 1) {
+					if(seqPos > seqDict[curStep].length - 1) {
 						io.emit('complete');
 						if(curStep < setDict.length - 1)
 							curStep++;
 						stopRecording();
 					} else {		
-						temp = '#a' + (curSeq[seqPos]).toString();
+						temp = '#a' + (seqDict[curStep][seqPos]).toString();
 						$(temp).css('background-image', 'url("img/' + $(temp).attr('id') + '.png")');
 						$(temp).fadeOut(0).fadeIn('slow');
 						$('h3', temp).css('color', 'red');
 						$('#seq' + seqPos).css('color', 'red');
-						audios[curSet.charAt(curSeq[seqPos] - 1) - 1].play();
+						audios[setDict[curStep].charAt(seqDict[curStep][seqPos] - 1) - 1].play();
 						var now = new Date();
 						wstream.write((seqPos + 1) + ',' + ('0' + now.getMinutes()).slice(-2) + '.' + ('0' + now.getSeconds()).slice(-2) + '.' + now.getMilliseconds() + '\r\n');
 						seqPos++;

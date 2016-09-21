@@ -1,17 +1,18 @@
 const fs = require('fs');
 const csv = require('csv');
+const app = require('electron').remote;
+const dialog = app.dialog;
 
 $(document).ready(function() {
 	var setDict = ['1234', '1324', '4231', '4321'];
 	var seqDict = ['123434', '3423132412', '1324323123', '4313122423'];
 	var partDict = ['Head', 'Shoulders', 'Knees', 'Toes'];
 	
-	var playing, loading, timer, startTime, seqPos, curStep, curSet, curSeq, i, j;
+	var playing, loading, timer, startTime, seqPos, curStep, i, j;
 	var maxTime = 3000; //Time (ms) between each command
 	var buffers = [];
 	playing = loading = timer = startTime = seqPos = curStep = i = 0;
 	j = -2;
-	curSet = curSeq = '';
 
 	//Declare canvases
 	var playbackCanvas = document.getElementById('playback');
@@ -59,12 +60,11 @@ $(document).ready(function() {
 	$('.container').fadeIn();
 	loading = 1;
 	curStep = 1;
-	curSet = setDict[curStep];
-	curSeq = setDict[curStep];
 	pbctx.clearRect(0, 0, 640, 360);
 	pbctx.fillText('Loading...', playbackCanvas.width / 2, playbackCanvas.height / 2);
 	$('.progress-bar').css('width','0%').attr('aria-valuenow', 0).text('0%');
-	reqVideo();
+	var dir = dialog.showOpenDialog({properties: ['openDirectory']});
+	reqVideo(dir);
 	
 	//Analysis controls
 	$('#analysis-play').click(function() {
@@ -83,15 +83,29 @@ $(document).ready(function() {
 		drawConfidences();
 	});	
 	$('#analysis-rewind').click(function() {
-		if(i > 5) {
-			i -= 5;
+		if(i > 10) {
+			i -= 10;
 			drawFrame();
 			drawConfidences();
 		}
-	});	
+	});
+	$('#analysis-prev').click(function() {
+		if(i > 0) {
+			i--;
+			drawFrame();
+			drawConfidences();
+		}
+	});
+	$('#analysis-next').click(function() {
+		if(i < buffers.length - 1) {
+			i++;
+			drawFrame();
+			drawConfidences();
+		}
+	});
 	$('#analysis-forward').click(function() {
-		if(i < buffers.length - 5) {
-			i += 5;
+		if(i < buffers.length - 11) {
+			i += 10;
 			drawFrame();
 			drawConfidences();
 		}
@@ -115,8 +129,8 @@ $(document).ready(function() {
 		j = Math.floor((frameTime - startTime) / 3) - 1;
 		imageObj.src = 'data:image/jpeg;base64,' + buffers[i].buffer;
 		if(j > -1) {
-			$('#spoken').text('Spoken: ' + partDict[curSet.charAt(curSeq[j] - 1) - 1]);
-			$('#correct').text('Command: ' + partDict[curSeq[j] - 1]);
+			$('#spoken').text('Spoken: ' + partDict[setDict[curStep].charAt(seqDict[curStep][j] - 1) - 1]);
+			$('#correct').text('Command: ' + partDict[seqDict[curStep][j] - 1]);
 		}
 		$('#frameNumber').text(i.toString());
 		$('#prediction').text('Prediction: ' + partDict[parseInt(buffers[i].dataclass)]);
@@ -136,17 +150,18 @@ $(document).ready(function() {
 	
 	setInterval(function() {
 		if(playing && i < buffers.length - 1) {
+			i++;
 			drawFrame();
 			drawConfidences();
-			i++;
 		} else if(playing) {
 			playing = 0;
 			$('#analysis-play').removeClass('glyphicon-pause').addClass('glyphicon-play');
 		}
 	}, 30);
 	
-	function reqVideo() {
-		var dir = 'C:/data/23.08-step11-Sanika/';
+	function reqVideo(dir) {
+		dir = dir.toString().replace(/\\/g, '/') + '/';
+		console.log(dir);
 		var lookup = {};
 		fs.readFile(dir + 'analysis.csv', 'utf8', function(err, data) {
 			if(err) {
@@ -175,9 +190,23 @@ $(document).ready(function() {
 												console.log(err.toString());
 											}
 											else if(files[k] != 'analysis.csv') {
-												drawImage({buffer: buf.toString('base64'), index: k, max: files.length - 1, name: files[k].toString(), dataclass: lookup[files[k]][0], confidences: lookup[files[k]][1]});
-												k++;
-												next();
+												buffers.push({buffer: buf.toString('base64'), name: files[k].toString(), dataclass: lookup[files[k]][0], confidences: lookup[files[k]][1]});
+												var prog = parseInt(100 * k / (files.length - 1));
+												$('.progress-bar').css('width', prog + '%').attr('aria-valuenow', prog).text(parseInt(prog) + '%');
+												if(k >= files.length - 2) {
+													$('.progress').fadeOut(function() {
+														var frameTimeHMS = /\d{2}\-\d{2}\-\d{2}\.\d{3}/.exec(buffers[0].name).toString();
+														var a = frameTimeHMS.split('-');
+														startTime = parseFloat(a[0] * 3600 + a[1] * 60 + a[2]);
+														$('.analysis-controls').removeClass('noevents').fadeTo(0, 1, function() {
+															$('#analysis-play').trigger('click');
+														});
+														timer = 0;
+													});
+												} else {
+													k++;
+													next();
+												}
 											}
 										});
 									}
@@ -188,28 +217,5 @@ $(document).ready(function() {
 				});
 			}
 		});
-	}
-	
-	function drawImage(data) {
-		buffers.push(data);
-		var prog = parseInt(100 * data.index / data.max);
-		$('.progress-bar').css('width', prog + '%').attr('aria-valuenow', prog).text(parseInt(prog) + '%');
-		//playing = 1; //Skip preloading
-		if(data.index + 1 == data.max) {
-			$('.progress').fadeOut(function() {
-				var frameTimeHMS = /\d{2}\-\d{2}\-\d{2}\.\d{3}/.exec(buffers[0].name).toString();
-				var a = frameTimeHMS.split('-');
-				startTime = parseFloat(a[0] * 3600 + a[1] * 60 + a[2]);
-				$('#analysis-step-back').removeClass('noevents').fadeTo(0, 1);
-				$('#analysis-rewind').removeClass('noevents').fadeTo(0, 1);
-				$('#analysis-forward').removeClass('noevents').fadeTo(0, 1);
-				$('#analysis-step-forward').removeClass('noevents').fadeTo(0, 1);
-				$('#analysis-play').removeClass('noevents').fadeTo(0, 1, function() {
-					$(this).trigger('click');
-				});
-				drawFrame();
-				timer = 0;
-			});			
-		}
 	}
 });
