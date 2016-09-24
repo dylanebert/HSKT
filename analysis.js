@@ -176,7 +176,7 @@ $(document).ready(function() {
 						output.forEach(function(entry) {
 							lookup[entry[0]] = [entry[1], entry[2]];
 						});
-						fs.readdir(dir, function(err, files) {
+						fs.readdir(dir + 'frames/', function(err, files) {
 							if(err) {
 								console.log(err.toString());
 							}
@@ -185,15 +185,15 @@ $(document).ready(function() {
 								next();
 								function next() {
 									if(k < files.length) {
-										fs.readFile(dir + files[k], function(err, buf) {
+										fs.readFile(dir + 'frames/' + files[k], function(err, buf) {
 											if(err) {
 												console.log(err.toString());
 											}
-											else if(files[k] != 'analysis.csv') {
+											else {
 												buffers.push({buffer: buf.toString('base64'), name: files[k].toString(), dataclass: lookup[files[k]][0], confidences: lookup[files[k]][1]});
 												var prog = parseInt(100 * k / (files.length - 1));
 												$('.progress-bar').css('width', prog + '%').attr('aria-valuenow', prog).text(parseInt(prog) + '%');
-												if(k >= files.length - 2) {
+												if(k >= files.length - 1) {
 													$('.progress').fadeOut(function() {
 														var frameTimeHMS = /\d{2}\-\d{2}\-\d{2}\.\d{3}/.exec(buffers[0].name).toString();
 														var a = frameTimeHMS.split('-');

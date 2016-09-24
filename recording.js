@@ -102,8 +102,7 @@ $(document).ready(function() {
 			io.emit('cancel');
 			stopRecording();
 		}
-	});
-	
+	});	
 	function stopRecording() {
 		recording = 0;
 		timer = 0;
