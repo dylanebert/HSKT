@@ -2,16 +2,17 @@ const fs = require('fs');
 const csv = require('csv');
 const app = require('electron').remote;
 const dialog = app.dialog;
+const path = require('path');
 
 $(document).ready(function() {
 	var setDict = ['1234', '1324', '4231', '4321'];
 	var seqDict = ['123434', '3423132412', '1324323123', '4313122423'];
 	var partDict = ['Head', 'Shoulders', 'Knees', 'Toes'];
 	
-	var playing, loading, timer, startTime, seqPos, curStep, i, j;
+	var playing, loading, timer, startTime, seqPos, curStep, i, j, k;
 	var maxTime = 3000; //Time (ms) between each command
 	var buffers = [];
-	playing = loading = timer = startTime = seqPos = curStep = i = 0;
+	playing = loading = timer = startTime = seqPos = curStep = i = k = 0;
 	j = -2;
 
 	//Declare canvases
@@ -61,10 +62,49 @@ $(document).ready(function() {
 	loading = 1;
 	curStep = 1;
 	pbctx.clearRect(0, 0, 640, 360);
-	pbctx.fillText('Loading...', playbackCanvas.width / 2, playbackCanvas.height / 2);
+	pbctx.fillText('Choose recording above', playbackCanvas.width / 2, playbackCanvas.height / 2);
 	$('.progress-bar').css('width','0%').attr('aria-valuenow', 0).text('0%');
-	var dir = dialog.showOpenDialog({properties: ['openDirectory']});
-	reqVideo(dir);
+	
+	//Populate participants menu
+	fs.readFile('C:/data/participants.csv', 'utf-8', function read(err, data) {
+		if(err)
+			console.log(err.toString());
+		else {
+			csv.parse(data, function(err, output) {
+				if(err)
+					console.log(err.toString());
+				else {
+					output.forEach(function(entry) {
+						var valid = false;
+						var toAppend = '';
+						toAppend += '<li class="dropdown-submenu"><a class="test" tabindex="-1" href="#">' + entry[0] + ' ' + '<span class="caret"></span></a><ul class="dropdown-menu">';
+						for(k = 1; k < entry.length; k++) {
+							if(fs.existsSync(entry[k].trim() + 'analysis.csv')) {
+								toAppend += '<li><a href="#" class="participant-entry" path="' + entry[k].trim() + '">' + 'Step ' + k + '</a></li>';
+								valid = true;
+							}
+						}
+						toAppend += '</ul></li>';
+						if(valid)
+							$('#participants-menu').append(toAppend);
+					});
+					enableMenus();
+				}
+			});
+		}
+	});
+	function enableMenus() {
+		$('.dropdown-submenu a.test').on('click', function(e) {
+			$(this).next('ul').toggle();
+			e.stopPropagation();
+			e.preventDefault();
+		});
+		$('.participant-entry').on('click', function(e) {
+			pbctx.clearRect(0, 0, 640, 360);
+			pbctx.fillText('Loading...', playbackCanvas.width / 2, playbackCanvas.height / 2);
+			reqVideo($(this).attr('path'));			
+		});
+	}
 	
 	//Analysis controls
 	$('#analysis-play').click(function() {

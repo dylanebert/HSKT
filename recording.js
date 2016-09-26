@@ -26,6 +26,7 @@ $(document).ready(function() {
 	var maxTime = 3000; //Time (ms) between each command
 	var kinectConnected = false;
 	var participantName = 'Name';
+	var metadata = ['undefined', 'undefined', 'undefined', 'undefined', 'undefined'];
 	recording = timer = startTime = seqPos = curStep = i = 0;
 	
 	//Initalisation
@@ -48,6 +49,7 @@ $(document).ready(function() {
 		e.preventDefault();
 		$('.modal').modal('hide');
 		participantName = $('#name').val();
+		metadata[0] = participantName;
 		if(kinectConnected)
 			io.emit('name', participantName);
 	});
@@ -91,11 +93,12 @@ $(document).ready(function() {
 			$(this).addClass('noevents').fadeTo(0, 0.25);
 			$('#record-stop').removeClass('noevents').fadeTo(0, 1);
 			$('.list-group-item').addClass('noevents');
-			var filename = '';
+			var dir = '';
 			var now = new Date();
-			filename += 'C:/data/' + ('0' + now.getDate()).slice(-2) + '.' + ('0' + now.getHours()).slice(-2) + '.' + ('0' + now.getMinutes()).slice(-2) + '-step' + (parseInt(curStep) + 1).toString() + '-' + participantName + '.csv';
-			wstream = fs.createWriteStream(filename);
-		}		
+			dir += 'C:/data/' + ('0' + now.getDate()).slice(-2) + '.' + ('0' + now.getHours()).slice(-2) + '.' + ('0' + now.getMinutes()).slice(-2) + '-step' + (parseInt(curStep) + 1).toString() + '-' + participantName;
+			wstream = fs.createWriteStream(dir + '.csv');
+			metadata[parseInt(curStep) + 1] = dir + '/';
+		}
 	});	
 	$('#record-stop').click(function() {
 		if(recording == 1) {
@@ -110,6 +113,13 @@ $(document).ready(function() {
 		$('.list-group-item').removeClass('noevents');
 		$('#nav' + curStep).trigger('click');
 		wstream.end();
+		if(curStep == 3) {
+			var toWrite = metadata[0] + ', ' + metadata[1] + ', ' + metadata[2] + ', ' + metadata[3] + ', ' + metadata[4] + '\n'; 
+			fs.appendFile('C:/data/participants.csv', toWrite, function(err) {
+				if(err)
+					console.log(err);
+			});
+		}
 	}
 	
 	//To analysis
