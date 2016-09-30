@@ -9,10 +9,10 @@ $(document).ready(function() {
 	var seqDict = ['123434', '3423132412', '1324323123', '4313122423'];
 	var partDict = ['Head', 'Shoulders', 'Knees', 'Toes'];
 	
-	var playing, loading, timer, startTime, seqPos, curStep, i, j, k;
+	var playing, timer, startTime, seqPos, curStep, i, j, k;
 	var maxTime = 3000; //Time (ms) between each command
 	var buffers = [];
-	playing = loading = timer = startTime = seqPos = curStep = i = k = 0;
+	playing = timer = startTime = seqPos = curStep = i = k = 0;
 	j = -2;
 
 	//Declare canvases
@@ -59,11 +59,19 @@ $(document).ready(function() {
 		e.preventDefault();
 	});
 	$('.container').fadeIn();
-	loading = 1;
-	curStep = 1;
 	pbctx.clearRect(0, 0, 640, 360);
 	pbctx.fillText('Choose recording above', playbackCanvas.width / 2, playbackCanvas.height / 2);
 	$('.progress-bar').css('width','0%').attr('aria-valuenow', 0).text('0%');
+	
+	//Scores modal
+	$('#scores_button').click(function() {
+		$('.modal').modal('show');
+		if(playing == 1)
+			$('#analysis-play').trigger('click');
+	});
+	$('#modal_close').click(function() {
+		$('.modal').modal('hide');
+	});
 	
 	//Populate participants menu
 	fs.readFile('C:/data/participants.csv', 'utf-8', function read(err, data) {
@@ -200,7 +208,7 @@ $(document).ready(function() {
 	}, 30);
 	
 	function reqVideo(dir) {
-		dir = dir.toString().replace(/\\/g, '/') + '/';
+		dir = dir.toString().replace(/\\/g, '/');
 		console.log(dir);
 		var lookup = {};
 		fs.readFile(dir + 'analysis.csv', 'utf8', function(err, data) {
@@ -238,10 +246,15 @@ $(document).ready(function() {
 														var frameTimeHMS = /\d{2}\-\d{2}\-\d{2}\.\d{3}/.exec(buffers[0].name).toString();
 														var a = frameTimeHMS.split('-');
 														startTime = parseFloat(a[0] * 3600 + a[1] * 60 + a[2]);
-														$('.analysis-controls').removeClass('noevents').fadeTo(0, 1, function() {
-															$('#analysis-play').trigger('click');
-														});
+														$('.analysis-controls').removeClass('noevents').fadeTo(0, 1);
+														playing = 0;
 														timer = 0;
+														var stepString = /step\d/.exec(dir).toString();
+														curStep = parseInt(stepString.charAt(stepString.length - 1)) - 1;
+														j = -2;
+														drawFrame();
+														drawConfidences();
+														setScore(dir);
 													});
 												} else {
 													k++;
@@ -252,6 +265,25 @@ $(document).ready(function() {
 									}
 								}
 							}
+						});
+					}
+				});
+			}
+		});
+	}
+	
+	function setScore(dir) {
+		fs.readFile(dir + 'score.csv', 'utf-8', function(err, data) {
+			if(err)
+				console.log(err.toString());
+			else {
+				csv.parse(data, function(err, output) {
+					if(err)
+						console.log(err.toString());
+					else {
+						$('#scores_button').removeClass('disabled');
+						output.forEach(function(entry) {							
+							$('#scores').append('<tr><td>' + entry[0] + '</td><td>' + entry[1] + '</td><td>' + entry[2] + '</td></tr>');
 						});
 					}
 				});
