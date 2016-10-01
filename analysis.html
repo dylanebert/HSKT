@@ -28,12 +28,12 @@
     margin-top: -1px;
 }
 </style>
-<!-- Modal -->
-<div class="modal fade" role="dialog" data-backdrop="static" style="margin: auto;">
+<!--Score-->
+<div class="modal fade" id="score_modal" role="dialog" data-backdrop="static" style="margin: auto;">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h4 class="modal-title">Scores</h4>
+				<h4 class="modal-title">Score</h4>
 			</div>
 			<div class="modal-body">
 				<table class="table table-striped">
@@ -46,7 +46,21 @@
 					</thead>
 					<tbody id="scores"></tbody>
 				</table>
-				<button type="submit" class="btn btn-default" id="modal_close">Close</button>
+				<button type="submit" class="btn btn-default" id="score_modal_close">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!--Report-->
+<div class="modal fade" id="report_modal" role="dialog" data-backdrop="static" style="margin: auto;">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Report</h4>
+			</div>
+			<div class="modal-body">
+				<canvas id="report" width="300" height="300" style="pointer-events: none; margin: auto;"></canvas>
+				<button type="submit" class="btn btn-default" id="report_modal_close">Close</button>
 			</div>
 		</div>
 	</div>
@@ -57,14 +71,24 @@
 		<div class="row" style="height: 90%">
 			<div class="col-sm-7 left-col">
 				<h4 class="text-muted">Playback:</h4>
-				<div class="row" style="width: 640px; margin: 25px auto 50px auto">
-					<div class="col-sm-6 dropdown" style="text-align: left; width: 320px;">
-						<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Select Recording
-						<span class="caret"></span></button>
-						<ul class="dropdown-menu" id="participants-menu"></ul>
+				<div class="row" style="width: 640px; margin: 25px auto 10px auto">
+					<div class="col-sm-6" style="text-align: left; width: 320px;">
+						<!--Select participant-->
+						<span class="dropdown">
+							<button class="btn btn-default dropdown-toggle" type="button" id="participant-button" data-toggle="dropdown">Select Participant
+							<span class="caret"></span></button>
+							<ul class="dropdown-menu" id="participants-menu"></ul>
+						</span>
+						<!--Select step-->
+						<span class="dropdown">
+							<button class="btn btn-default dropdown-toggle disabled"  id="step-button" type="button" data-toggle="dropdown">Select Step
+							<span class="caret"></span></button>
+							<ul class="dropdown-menu" id="step-menu"></ul>
+						</span>
 					</div>
 					<div class="col-sm-6" style="text-align: right; width: 320px;">
-						<button class="btn btn-default disabled" type="button" id="scores_button">View Scores</button>
+						<button class="btn btn-default disabled" type="button" id="scores_button">View Score</button>
+						<button class="btn btn-default disabled" type="button" id="report_button">View Report</button>
 					</div>
 				</div>
 				<canvas id="playback" width="640" height="360"></canvas>
