@@ -15,9 +15,12 @@ namespace KinectConnector
     class Program
     {
         KinectSensor sensor;
+        MultiSourceFrameReader reader;
+        IList<Body> bodies;
+        StreamWriter sw;
         bool recording;
-        byte[] buffer;
-        WriteableBitmap bmp;
+        byte[] color_buffer;
+        WriteableBitmap color_bmp;
         string name = "unnamed";
         string curStep = "-1";
         string dir;
@@ -44,17 +47,24 @@ namespace KinectConnector
                 recording = true;
                 curStep = data.ToString();
                 dir = "C:/data/" + string.Format("{0:dd.HH.mm}", DateTime.Now) + "-step" + curStep + "-" + name + "/";
-                if(!Directory.Exists(Path.GetDirectoryName(dir)))
+                if (!Directory.Exists(Path.GetDirectoryName(dir)))
+                {
                     Directory.CreateDirectory(Path.GetDirectoryName(dir));
+                    Directory.CreateDirectory(Path.GetDirectoryName(dir + "frames/"));
+                    Directory.CreateDirectory(Path.GetDirectoryName(dir + "depth/"));
+                }
+                sw = new StreamWriter(dir + "skeleton.csv");
             });
             socket.On("cancel", () =>
             {
                 Console.WriteLine("Canceling recording");
+                sw.Close();
                 recording = false;
             });
             socket.On("complete", () =>
             {
                 Console.WriteLine("Completed recording");
+                sw.Close();
                 recording = false;
             });
 
@@ -64,37 +74,111 @@ namespace KinectConnector
             {
                 sensor.Open();
             }
-            var fd = sensor.ColorFrameSource.CreateFrameDescription(ColorImageFormat.Bgra);
-            buffer = new byte[fd.LengthInPixels * fd.BytesPerPixel];
-            bmp = new WriteableBitmap(fd.Width, fd.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
-            sensor.ColorFrameSource.OpenReader().FrameArrived += SensorColorFrameReady;
+            var color_fd = sensor.ColorFrameSource.CreateFrameDescription(ColorImageFormat.Bgra);
+            color_buffer = new byte[color_fd.LengthInPixels * color_fd.BytesPerPixel];
+            color_bmp = new WriteableBitmap(color_fd.Width, color_fd.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+            reader = sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Body);
+            reader.MultiSourceFrameArrived += Reader_MultiSourceFrameArrived;
         }
 
-        void SensorColorFrameReady(object sender, ColorFrameArrivedEventArgs e)
+        void Reader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
-            using(ColorFrame frame = e.FrameReference.AcquireFrame())
+            if (!recording) return;
+
+            var reference = e.FrameReference.AcquireFrame();
+
+            //Color
+            using(var frame = reference.ColorFrameReference.AcquireFrame())
             {
-                if (frame == null) return;
-
-                frame.CopyConvertedFrameDataToArray(buffer, ColorImageFormat.Bgra);
-
-                var fd = frame.FrameDescription;
-                var bpp = (PixelFormats.Bgr32.BitsPerPixel) / 8;
-                var stride = bpp * fd.Width;
-                BitmapSource bmpSource = BitmapSource.Create(fd.Width, fd.Height, 96.0, 96.0, PixelFormats.Bgr32, null, buffer, stride);
-                bmp = new WriteableBitmap(bmpSource);
-
-                if (recording)
+                if (frame != null)
                 {
+                    frame.CopyConvertedFrameDataToArray(color_buffer, ColorImageFormat.Bgra);
+
+                    var fd = frame.FrameDescription;
+                    var bpp = (PixelFormats.Bgr32.BitsPerPixel) / 8;
+                    var stride = bpp * fd.Width;
+                    BitmapSource bmpSource = BitmapSource.Create(fd.Width, fd.Height, 96.0, 96.0, PixelFormats.Bgr32, null, color_buffer, stride);
+                    color_bmp = new WriteableBitmap(bmpSource);
                     JpegBitmapEncoder encoder = new JpegBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(bmpSource));
-                    string path = dir + string.Format("{0:hh-mm-ss.fff}.jpg", DateTime.Now);
+                    string path = dir + "frames/" + string.Format("{0:hh-mm-ss.fff}.jpg", DateTime.Now);
                     Console.WriteLine(path);
                     using (var fs = new FileStream(@path, FileMode.Create, FileAccess.Write))
                     {
                         encoder.Save(fs);
                     }
-                }                
+                }
+            }
+
+            //Depth
+            using (var frame = reference.DepthFrameReference.AcquireFrame())
+            {
+                if (frame != null)
+                {
+                    int width = frame.FrameDescription.Width;
+                    int height = frame.FrameDescription.Height;
+
+                    ushort minDepth = frame.DepthMinReliableDistance;
+                    ushort maxDepth = frame.DepthMaxReliableDistance;
+
+                    ushort[] depthData = new ushort[width * height];
+                    byte[] pixelData = new byte[width * height * (PixelFormats.Bgr32.BitsPerPixel + 7) / 8];
+
+                    frame.CopyFrameDataToArray(depthData);
+
+                    int colorIndex = 0;
+                    for (int depthIndex = 0; depthIndex < depthData.Length; ++depthIndex)
+                    {
+                        ushort depth = depthData[depthIndex];
+                        byte intensity = (byte)(depth >= minDepth && depth <= maxDepth ? depth : 0);
+
+                        pixelData[colorIndex++] = intensity; // Blue
+                        pixelData[colorIndex++] = intensity; // Green
+                        pixelData[colorIndex++] = intensity; // Red
+
+                        ++colorIndex;
+                    }
+
+                    var bpp = (PixelFormats.Bgr32.BitsPerPixel) / 8;
+                    var stride = bpp * width;
+                    BitmapSource bmpSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgr32, null, pixelData, stride);
+                    WriteableBitmap bmp = new WriteableBitmap(bmpSource);
+                    JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bmpSource));
+                    string path = dir + "depth/" + string.Format("{0:hh-mm-ss.fff}.jpg", DateTime.Now);
+                    using (var fs = new FileStream(@path, FileMode.Create, FileAccess.Write))
+                    {
+                        encoder.Save(fs);
+                    }
+                }
+            }
+
+            //Body
+            using (var frame = reference.BodyFrameReference.AcquireFrame())
+            {
+                if (frame != null)
+                {
+                    bodies = new Body[frame.BodyFrameSource.BodyCount];
+
+                    frame.GetAndRefreshBodyData(bodies);
+
+                    foreach (Body body in bodies)
+                    {
+                        if (body != null)
+                        {
+                            if (body.IsTracked)
+                            {
+                                var line = string.Format("{0:hh-mm-ss.fff}.jpg", DateTime.Now);
+                                foreach (JointType jt in Enum.GetValues(typeof(JointType)))
+                                {
+                                    Joint joint = body.Joints[jt];
+                                    line += "," + jt.ToString() + "," + joint.Position.X + "," + joint.Position.Y + "," + joint.Position.Z;
+                                }
+                                sw.WriteLine(line);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
