@@ -46,7 +46,7 @@ namespace KinectConnector
                 Console.WriteLine("Beginning recording");
                 recording = true;
                 curStep = data.ToString();
-                dir = "C:/data/" + string.Format("{0:dd.HH.mm}", DateTime.Now) + "-step" + curStep + "-" + name + "/";
+                dir = "C:/data/" + string.Format("{0:dd.MM}", DateTime.Now) + "-step" + curStep + "-" + name + "/";
                 if (!Directory.Exists(Path.GetDirectoryName(dir)))
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(dir));
