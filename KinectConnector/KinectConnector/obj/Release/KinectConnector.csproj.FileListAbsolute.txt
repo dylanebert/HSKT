@@ -11,3 +11,6 @@ C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\bin\Release\N
 C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.csprojResolveAssemblyReference.cache
 C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.exe
 C:\Users\dylan\Documents\Werk\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.pdb
+C:\Users\dylan\Documents\HSKT\KinectConnector\KinectConnector\bin\Release\KinectConnector.exe.config
+C:\Users\dylan\Documents\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.exe
+C:\Users\dylan\Documents\HSKT\KinectConnector\KinectConnector\obj\Release\KinectConnector.pdb

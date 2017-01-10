@@ -6,8 +6,8 @@ const io = require('socket.io')(server);
 const fs = require('fs');
 
 $(document).ready(function() {	
-	var setDict = ['1234', '1324', '4231', '4321'];
-	var seqDict = ['123434', '3423132412', '1324323123', '4313122423'];
+	var setDict = ['4231', '4321', '3412'];
+	var seqDict = ['1441411414', '1434213324', '2134432112'];
 	var partDict = ['Head', 'Shoulders', 'Knees', 'Toes'];
 	
 	var recording, timer, startTime, seqPos, curStep, i;
