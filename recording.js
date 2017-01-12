@@ -64,6 +64,7 @@ $(document).ready(function() {
 			$('#a3 h3').text(partDict[parseInt(setDict[curStep].toString().charAt(2)) - 1]).css('color', 'black');
 			$('#a4 h3').text(partDict[parseInt(setDict[curStep].toString().charAt(3)) - 1]).css('color', 'black');
 			$('#record-stop').addClass('noevents').fadeTo(0, 0.25);
+			$('#score_buttons').addClass('noevents').fadeTo(0, 0.25);
 			if(kinectConnected)
 				$('#record-start').removeClass('noevents').fadeTo(0, 1);
 			else
@@ -89,6 +90,7 @@ $(document).ready(function() {
 			$('#bgfocus').fadeIn();
 			$(this).addClass('noevents').fadeTo(0, 0.25);
 			$('#record-stop').removeClass('noevents').fadeTo(0, 1);
+			$('#score_buttons').removeClass('noevents').fadeTo(0, 1);
 			$('.list-group-item').addClass('noevents');			
 		}
 	});	
@@ -110,6 +112,13 @@ $(document).ready(function() {
 					console.log(err);
 			});
 		}
+	}
+	
+	$('#score_0').click(function() {scoreClick(0)});
+	$('#score_1').click(function() {scoreClick(1)});
+	$('#score_2').click(function() {scoreClick(2)});
+	function scoreClick(val) {
+		completeRecording();
 	}
 	
 	//To analysis
@@ -136,6 +145,26 @@ $(document).ready(function() {
 		});
 	});
 	
+	function completeRecording() {
+		if(seqPos > seqDict[curStep].length - 1) {
+			if(curStep < setDict.length - 1) {
+				curStep++;
+				seqPos = 0;
+			}
+			wstream.end();
+		} else {		
+			var temp = '#a' + (seqDict[curStep][seqPos]).toString();
+			$(temp).css('background-image', 'none');
+			$('h3', temp).css('color', 'black');
+			$('#seq' + (seqPos - 1)).css('color', 'black');
+			var now = new Date();
+			wstream.write((seqPos + 1) + ',' + ('0' + now.getMinutes()).slice(-2) + '.' + ('0' + now.getSeconds()).slice(-2) + '.' + now.getMilliseconds() + '\r\n');
+			seqPos++;
+		}
+		io.emit('complete');
+		stopRecording();
+	}
+	
 	//Update function
 	setInterval(function() {
 		if(recording == 1) {
@@ -151,26 +180,6 @@ $(document).ready(function() {
 				}
 				timer += 100;
 				$('#view .glyphicon-arrow-up').css('left', '+=1');
-				if(timer >= maxTime) {
-					timer = 0;
-					if(seqPos > seqDict[curStep].length - 1) {
-						if(curStep < setDict.length - 1) {
-							curStep++;
-							seqPos = 0;
-						}
-						wstream.end();
-					} else {		
-						var temp = '#a' + (seqDict[curStep][seqPos]).toString();
-						$(temp).css('background-image', 'none');
-						$('h3', temp).css('color', 'black');
-						$('#seq' + (seqPos - 1)).css('color', 'black');
-						var now = new Date();
-						wstream.write((seqPos + 1) + ',' + ('0' + now.getMinutes()).slice(-2) + '.' + ('0' + now.getSeconds()).slice(-2) + '.' + now.getMilliseconds() + '\r\n');
-						seqPos++;
-					}
-					io.emit('complete');
-					stopRecording();
-				}
 			}
 			else {
 				stopRecording();

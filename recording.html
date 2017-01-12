@@ -127,15 +127,32 @@
 						<h3 style="left: 200px;">Toes</h3>
 					</div>
 				</div>
-				<h1>
-					<span id="record-start" class="glyphicon glyphicon-play" data-toggle="tooltip" title="Begin the sequence"></span>
-					<span id="record-stop" class="glyphicon glyphicon-remove" data-toggle="tooltip" title="Cancel the sequence"></span>
-				</h1>
+				<table class="table">
+					<tr>
+						<td>Controls</td>
+						<td>Score</td>
+					</tr>
+					<tr>
+						<td style="width: 50%;">
+							<span style="font-size: 32px;">
+								<span id="record-start" class="glyphicon glyphicon-play" data-toggle="tooltip" title="Begin the sequence"></span>
+								<span id="record-stop" class="glyphicon glyphicon-remove" data-toggle="tooltip" title="Cancel the sequence"></span>
+							</span>
+						</td>
+						<td style="width: 50%;">
+							<span id="score_buttons" class="glyphicon noevents btn-group btn-group-justified" style="font-size: 28px;">
+								<a href="#" class="btn btn-default" id="score_0" data-toggle="tooltip" title="Assign a score of 0">0</a>
+								<a href="#" class="btn btn-default" id="score_1" data-toggle="tooltip" title="Assign a score of 1">1</a>
+								<a href="#" class="btn btn-default" id="score_2" data-toggle="tooltip" title="Assign a score of 2">2</a>
+							</span>
+						</td>
+					</tr>
+				</table>
 			</div>
 		</div>
-		<div class="row" style="margin-top: 25px;">
+		<!--<div class="row" style="margin-top: 25px;">
 			<button type="button" class="btn btn-default" id="analysisBtn">To Analysis</button>
-		</div>
+		</div>-->
 	</div>
 	<div id="bgfocus"></div>
 </body>
